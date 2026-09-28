@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
+    <title>Spotlight 7 — Grammar Trainer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #0a0a1a;
+            min-height: 100vh;
+            padding: 20px;
+            color: #ffffff;
+        }
+        .main-container { max-width: 1200px; margin: 0 auto; }
+        .main-title {
+            text-align: center;
+            font-size: 2.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+        .main-subtitle {
+            text-align: center;
+            color: #a0aec0;
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .modules-grid.hidden { display: none; }
+        .module-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.08);
+            transform: translateY(0);
+        }
+        .module-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .module-card:active { transform: scale(0.95); transition-duration: 0.1s; }
+        .module-card.coming-soon {
+            cursor: not-allowed;
+            opacity: 0.55;
+            filter: grayscale(0.6);
+        }
+        .module-card.coming-soon:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            border-color: rgba(255,255,255,0.08);
+        }
+        .module-card.coming-soon .module-card-btn {
+            background: rgba(255,255,255,0.08) !important;
+            color: #718096 !important;
+            box-shadow: none !important;
+            animation: none !important;
+            cursor: not-allowed;
+        }
+        .module-card.coming-soon .module-card-btn::before { display: none; }
+        .module-card.coming-soon .module-card-btn:hover { transform: none; }
+        .module-card-image {
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .module-card-image::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(0deg, rgba(0,0,0,0.3) 0%, transparent 60%);
+        }
+        .module-card-icon img {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+            z-index: 1;
+            filter: drop-shadow(0 4px 20px rgba(0,0,0,0.5));
+            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), filter 0.4s ease;
+        }
+        .module-card:hover:not(.coming-soon) .module-card-icon img {
+            transform: scale(1.15) rotate(-6deg);
+            filter: drop-shadow(0 8px 30px rgba(255,255,255,0.25));
+        }
+        .module-card-body {
+            padding: 20px 18px 24px;
+            text-align: center;
+        }
+        .module-card-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 4px;
+            letter-spacing: -0.5px;
+        }
+        .module-card-subtitle {
+            font-size: 0.8rem;
+            color: #a0aec0;
+            margin-bottom: 4px;
+            font-weight: 400;
+        }
+        .module-card-grammar {
+            font-size: 0.75rem;
+            color: #cbd5e0;
+            margin-bottom: 14px;
+            font-style: italic;
+            min-height: 32px;
+            line-height: 1.4;
+            opacity: 0.8;
+        }
+        .module-card-btn {
+            display: inline-block;
+            padding: 14px 40px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 800;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow: 0 8px 30px rgba(238,90,36,0.4), inset 0 2px 0 rgba(255,255,255,0.2);
+            transform: translateY(0);
+            animation: floatBtn 3s ease-in-out infinite;
+            position: relative;
+        }
+        .module-card-btn::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50px;
+            padding: 3px;
+            background: linear-gradient(135deg, #ff6b6b, #feca57, #ff6b6b);
+            background-size: 300% 300%;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: shimmerBorder 4s ease-in-out infinite;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        .module-card-btn:hover::before { opacity: 1; }
+        .module-card:hover:not(.coming-soon) .module-card-btn {
+            transform: translateY(-6px) scale(1.06);
+            box-shadow: 0 16px 50px rgba(238,90,36,0.6), 0 0 60px rgba(255,107,107,0.15);
+        }
+        .module-card-btn:active { transform: scale(0.92) translateY(0); transition-duration: 0.1s; animation: none; }
+        @keyframes floatBtn {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        @keyframes shimmerBorder {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .module-card:nth-child(1) .module-card-btn { background: linear-gradient(135deg, #ff6b6b, #ee5a24); box-shadow: 0 8px 30px rgba(238,90,36,0.4); animation-delay: 0s; }
+        .module-card:nth-child(2) .module-card-btn { background: linear-gradient(135deg, #48dbfb, #0abde3); box-shadow: 0 8px 30px rgba(10,189,227,0.4); animation-delay: 0.2s; }
+        .module-card:nth-child(3) .module-card-btn { background: linear-gradient(135deg, #feca57, #f9ca24); box-shadow: 0 8px 30px rgba(249,202,36,0.4); color: #1a1a2e; animation-delay: 0.4s; }
+        .module-card:nth-child(4) .module-card-btn { background: linear-gradient(135deg, #a29bfe, #6c5ce7); box-shadow: 0 8px 30px rgba(108,92,231,0.4); animation-delay: 0.6s; }
+        .module-card:nth-child(5) .module-card-btn { background: linear-gradient(135deg, #fd79a8, #e84393); box-shadow: 0 8px 30px rgba(232,67,147,0.4); animation-delay: 0.8s; }
+        .module-card:nth-child(6) .module-card-btn { background: linear-gradient(135deg, #ff6b6b, #d63031); box-shadow: 0 8px 30px rgba(214,48,49,0.4); animation-delay: 1.0s; }
+        .module-card:nth-child(7) .module-card-btn { background: linear-gradient(135deg, #fdcb6e, #e17055); box-shadow: 0 8px 30px rgba(225,112,85,0.4); animation-delay: 0.1s; }
+        .module-card:nth-child(8) .module-card-btn { background: linear-gradient(135deg, #74b9ff, #0984e3); box-shadow: 0 8px 30px rgba(9,132,227,0.4); animation-delay: 0.3s; }
+        .module-card:nth-child(9) .module-card-btn { background: linear-gradient(135deg, #55efc4, #00b894); box-shadow: 0 8px 30px rgba(0,184,148,0.4); animation-delay: 0.5s; }
+        .module-card:nth-child(10) .module-card-btn { background: linear-gradient(135deg, #81ecec, #00cec9); box-shadow: 0 8px 30px rgba(0,206,201,0.4); animation-delay: 0.7s; }
+
+        .test-mode { display: none; max-width: 750px; margin: 0 auto; }
+        .test-mode.active { display: block; }
+        .back-btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 18px;
+            margin-right: 10px;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+        .share-btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #48dbfb, #0abde3);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 20px rgba(10,189,227,0.3);
+        }
+        .share-btn:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 8px 30px rgba(10,189,227,0.5); }
+        .test-container {
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 28px 24px 32px;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+        }
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .test-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .question-counter {
+            background: rgba(255,255,255,0.08);
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-weight: 600;
+            color: #cbd5e0;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb);
+            border-radius: 10px;
+            transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .question-type-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+        }
+        .badge-option { background: rgba(72,219,251,0.15); color: #48dbfb; border: 1px solid rgba(72,219,251,0.3); }
+        .badge-input { background: rgba(254,202,87,0.15); color: #feca57; border: 1px solid rgba(254,202,87,0.3); }
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            min-height: 45px;
+            white-space: pre-line;
+        }
+        .input-instruction {
+            font-size: 0.95rem;
+            color: #feca57;
+            font-weight: 700;
+            margin-bottom: 12px;
+            padding: 10px 16px;
+            background: rgba(254,202,87,0.1);
+            border-left: 4px solid #feca57;
+            border-radius: 6px;
+            letter-spacing: 0.3px;
+        }
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255,255,255,0.04);
+            border: 2px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+            color: #e2e8f0;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+        }
+        .option-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); transform: translateX(4px); }
+        .option-btn:active { transform: scale(0.97); }
+        .option-btn.correct { background: rgba(46,213,115,0.2); border-color: #2ed573; color: #2ed573; font-weight: 600; box-shadow: 0 0 30px rgba(46,213,115,0.15); }
+        .option-btn.wrong { background: rgba(255,71,87,0.2); border-color: #ff4757; color: #ff4757; font-weight: 600; box-shadow: 0 0 30px rgba(255,71,87,0.15); }
+        .option-btn.disabled { pointer-events: none; }
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .input-area input {
+            padding: 16px 20px;
+            background: rgba(255,255,255,0.04);
+            border: 2px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+            transition: all 0.25s ease;
+            width: 100%;
+            outline: none;
+        }
+        .input-area input::placeholder { color: #718096; }
+        .input-area input:focus { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); }
+        .input-area input.correct-input { border-color: #2ed573; background: rgba(46,213,115,0.1); }
+        .input-area input.wrong-input { border-color: #ff4757; background: rgba(255,71,87,0.1); }
+        .input-area input:disabled { opacity: 0.7; }
+        .check-btn {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #feca57, #f9ca24);
+            color: #1a1a2e;
+            border: none;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            align-self: flex-start;
+            box-shadow: 0 4px 20px rgba(249,202,36,0.3);
+        }
+        .check-btn:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 8px 30px rgba(249,202,36,0.4); }
+        .check-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+        .input-feedback { font-size: 0.95rem; font-weight: 600; min-height: 28px; }
+        .input-feedback.correct-feedback { color: #2ed573; }
+        .input-feedback.wrong-feedback { color: #ff4757; }
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .nav-btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .nav-btn:active:not(:disabled) { transform: scale(0.93); }
+        .btn-prev { background: rgba(255,255,255,0.06); color: #cbd5e0; border: 1px solid rgba(255,255,255,0.06); }
+        .btn-prev:hover:not(:disabled) { background: rgba(255,255,255,0.1); transform: translateX(-3px); }
+        .btn-next { background: linear-gradient(135deg, #48dbfb, #0abde3); color: white; box-shadow: 0 4px 20px rgba(10,189,227,0.3); }
+        .btn-next:hover:not(:disabled) { transform: translateX(3px) scale(1.02); box-shadow: 0 8px 30px rgba(10,189,227,0.4); }
+        .score-display {
+            text-align: center;
+            font-weight: 700;
+            color: #feca57;
+            font-size: 0.95rem;
+            background: rgba(255,255,255,0.04);
+            padding: 8px 24px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.06);
+            display: inline-block;
+        }
+        .footer {
+            text-align: center;
+            color: #4a5568;
+            margin-top: 40px;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+        @media (max-width: 600px) {
+            body { padding: 12px; }
+            .main-title { font-size: 2rem; }
+            .modules-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+            .module-card-image { height: 120px; }
+            .module-card-icon img { width: 56px; height: 56px; }
+            .module-card-title { font-size: 1.05rem; }
+            .module-card-subtitle { font-size: 0.75rem; }
+            .module-card-grammar { font-size: 0.7rem; min-height: 28px; }
+            .module-card-btn { padding: 10px 24px; font-size: 0.8rem; }
+            .test-container { padding: 18px 14px 22px; border-radius: 18px; }
+            .test-title { font-size: 1.2rem; }
+            .question-text { font-size: 1.05rem; }
+            .option-btn { padding: 14px 16px; font-size: 0.9rem; }
+            .nav-buttons { flex-direction: column; gap: 8px; }
+            .nav-btn { width: 100%; text-align: center; padding: 14px; }
+            .score-display { width: 100%; text-align: center; }
+            .back-btn, .share-btn { display: block; width: 100%; text-align: center; margin-bottom: 10px; }
+            .share-btn { margin-left: 0; }
+        }
+        @media (max-width: 380px) {
+            .modules-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .module-card-image { height: 100px; }
+            .module-card-icon img { width: 44px; height: 44px; }
+            .module-card-body { padding: 12px 8px 14px; }
+            .module-card-title { font-size: 0.9rem; }
+            .module-card-grammar { font-size: 0.62rem; min-height: 24px; }
+            .module-card-btn { padding: 6px 14px; font-size: 0.65rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="main-title">✨ Spotlight 7</div>
+        <div class="main-subtitle">Grammar & Vocabulary Trainer</div>
+
+        <div class="modules-grid" id="modulesGrid">
+            <!-- Module 1: Lifestyles - ACTIVE -->
+            <div class="module-card" onclick="openModule('module1')">
+                <div class="module-card-image" style="background:linear-gradient(135deg, #1a1a3e, #2d1b69, #4a1a6b);">
+                    <div class="module-card-icon"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23ff6b6b'/%3E%3Ctext x='50' y='65' text-anchor='middle' font-size='36' font-weight='bold' fill='white'%3E1%3C/text%3E%3C/svg%3E" alt="Module 1"></div>
+                </div>
+                <div class="module-card-body">
+                    <div class="module-card-title">Module 1</div>
+                    <div class="module-card-subtitle">50 questions</div>
+                    <div class="module-card-grammar">Lifestyles · Revision</div>
+                    <button class="module-card-btn">Start</button>
+                </div>
+            </div>
+
+            <!-- Module 2: Coming soon -->
+            <div class="module-card coming-soon">
+                <div class="module-card-image" style="background:linear-gradient(135deg, #0a2e3e, #0a4a5e, #1a6a7e);">
+                    <div class="module-card-icon"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%2348dbfb'/%3E%3Ctext x='50' y='65' text-anchor='middle' font-size='36' font-weight='bold' fill='white'%3E2%3C/text%3E%3C/svg%3E" alt="Module 2"></div>
+                </div>
+                <div class="module-card-body">
+                    <div class="module-card-title">Module 2</div>
+                    <div class="module-card-subtitle">Tale Time</div>
+                    <div class="module-card-grammar">Coming soon...</div>
+                    <button class="module-card-btn">Soon</button>
+                </div>
+            </div>
+
+            <!-- Module 3 -->
+            <div class="module-card coming-soon">
+                <div class="module-card-image" style="background:linear-gradient(135deg, #3a2a0a, #5a3a1a, #7a4a2a);">
+                    <div class="module-card-icon"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23feca57'/%3E%3Ctext x='50' y='65' text-anchor='middle' font-size='36' font-weight='bold' fill='%231a1a2e'%3E3%3C/text%3E%3C/svg%3E" alt="Module 3"></div>
+                </div>
+                <div class="module-card-body">
+                    <div class="module-card-title">Module 3</div>
+                    <div class="module-card-subtitle">Profiles</div>
+                    <div class="module-card-grammar">Coming soon...</div>
+                    <button class="module-card-btn">Soon</button>
+                </div>
+            </div>
+
+            <!-- Module 4 -->
+            <div class="module-card coming-soon">
+                <div class="module-card-image" style="background:linear-gradient(135deg, #2a1a3e, #4a1a6b, #6a2a8a);">
+                    <div class="module-card-icon"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23a29bfe'/%3E%3Ctext x='50' y='65' text-anchor='middle' font-size='36' font-weight='bold' fill='white'%3E4%3C/text%3E%3C/svg%3E" alt="Module 4"></div>
+                </div>
+                <div class="module-card-body">
+                    <div class="module-card-title">Module 4</div>
+                    <div class="module-card-subtitle">In the News</div>
+                    <div class="module-card-grammar">Coming soon...</div>
+                    <button class="module-card-btn">Soon</button>
+                </div>
+            </div>
+
+            <!-- Module 5 -->
+            <div class="module-card coming-soon">
+                <div class="module-card-image" style="background:linear-gradient(135deg, #0a2a4a, #0a4a7a, #1a6a9a);">
+                    <div class="module-card-icon"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23fd79a8'/%3E%3Ctext x='50' y='65' text-anchor='middle' font-size='36' font-weight='bold' fill='white'%3E5%3C/text%3E%3C/svg%3E" alt="Module 5"></div>
+                </div>
+                <div class="module-card-body">
+                    <div class="module-card-title">Module 5</div>
+                    <div class="module-card-subtitle">What the Future Holds</div>
+                    <div class="module-card-grammar">Coming soon...</div>
+                    <button class="module-card-btn">Soon</button>
+                </div>
+            </div>
+
+            <!-- Module 6 -->
+            <div class="module-card coming-soon">
+                <div class="module-card-image" style="background:linear-gradient(135deg, #3a0a0a, #5a1a1a, #7a2a2a);">
+                    <div class="module-card-icon"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23ff6b6b'/%3E%3Ctext x='50' y='65' text-anchor='middle' font-size='36' font-weight='bold' fill='white'%3E6%3C/text%3E%3C/svg%3E" alt="Module 6"></div>
+                </div>
+                <div class="module-card-body">
+                    <div class="module-card-title">Module 6</div>
+                    <div class="module-card-subtitle">Having Fun</div>
+                    <div class="module-card-grammar">Coming soon...</div>
+                    <button class="module-card-btn">Soon</button>
+                </div>
+            </div>
+
+            <!-- Module 7 -->
+            <div class="module-card coming-soon">
+                <div class="module-card-image" style="background:linear-gradient(135deg, #3a2a0a, #5a3a1a, #7a5a2a);">
+                    <div class="module-card-icon"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23fdcb6e'/%3E%3Ctext x='50' y='65' text-anchor='middle' font-size='36' font-weight='bold' fill='%231a1a2e'%3E7%3C/text%3E%3C/svg%3E" alt="Module 7"></div>
+                </div>
+                <div class="module-card-body">
+                    <div class="module-card-title">Module 7</div>
+                    <div class="module-card-subtitle">In the Spotlight</div>
+                    <div class="module-card-grammar">Coming soon...</div>
+                    <button class="module-card-btn">Soon</button>
+                </div>
+            </div>
+
+            <!-- Module 8 -->
+            <div class="module-card coming-soon">
+                <div class="module-card-image" style="background:linear-gradient(135deg, #0a2a3a, #0a4a5a, #1a6a7a);">
+                    <div class="module-card-icon"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%2374b9ff'/%3E%3Ctext x='50' y='65' text-anchor='middle' font-size='36' font-weight='bold' fill='white'%3E8%3C/text%3E%3C/svg%3E" alt="Module 8"></div>
+                </div>
+                <div class="module-card-body">
+                    <div class="module-card-title">Module 8</div>
+                    <div class="module-card-subtitle">Green Issues</div>
+                    <div class="module-card-grammar">Coming soon...</div>
+                    <button class="module-card-btn">Soon</button>
+                </div>
+            </div>
+
+            <!-- Module 9 -->
+            <div class="module-card coming-soon">
+                <div class="module-card-image" style="background:linear-gradient(135deg, #2a1a0a, #5a3a1a, #7a5a2a);">
+                    <div class="module-card-icon"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%2355efc4'/%3E%3Ctext x='50' y='65' text-anchor='middle' font-size='36' font-weight='bold' fill='%231a1a2e'%3E9%3C/text%3E%3C/svg%3E" alt="Module 9"></div>
+                </div>
+                <div class="module-card-body">
+                    <div class="module-card-title">Module 9</div>
+                    <div class="module-card-subtitle">Shopping Time</div>
+                    <div class="module-card-grammar">Coming soon...</div>
+                    <button class="module-card-btn">Soon</button>
+                </div>
+            </div>
+
+            <!-- Module 10 -->
+            <div class="module-card coming-soon">
+                <div class="module-card-image" style="background:linear-gradient(135deg, #1a3a1a, #2a5a2a, #3a7a3a);">
+                    <div class="module-card-icon"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%2381ecec'/%3E%3Ctext x='50' y='65' text-anchor='middle' font-size='32' font-weight='bold' fill='%231a1a2e'%3E10%3C/text%3E%3C/svg%3E" alt="Module 10"></div>
+                </div>
+                <div class="module-card-body">
+                    <div class="module-card-title">Module 10</div>
+                    <div class="module-card-subtitle">Healthy Body, Healthy Mind</div>
+                    <div class="module-card-grammar">Coming soon...</div>
+                    <button class="module-card-btn">Soon</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-mode" id="testMode">
+            <div>
+                <button class="back-btn" onclick="goHome()">← Back to modules</button>
+                <button class="share-btn" onclick="shareResults()">📤 Share Results</button>
+            </div>
+            <div class="test-container">
+                <div class="test-header">
+                    <div class="test-title" id="testTitle">Module 1</div>
+                    <div class="question-counter" id="questionCounter">1 / 50</div>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:2%;"></div></div>
+                <div id="questionTypeBadge"></div>
+                <div class="question-text" id="questionText"></div>
+                <div id="inputInstruction"></div>
+                <div class="options-list" id="optionsList"></div>
+                <div class="input-area" id="inputArea" style="display:none;">
+                    <input type="text" id="inputField" placeholder="Type your answer...">
+                    <button class="check-btn" id="checkBtn" onclick="checkInput()">Check</button>
+                    <div class="input-feedback" id="inputFeedback"></div>
+                </div>
+                <div class="nav-buttons">
+                    <button class="nav-btn btn-prev" id="prevBtn" onclick="prevQuestion()">← Back</button>
+                    <span class="score-display" id="scoreDisplay">Score: 0</span>
+                    <button class="nav-btn btn-next" id="nextBtn" onclick="nextQuestion()">Next →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">Spotlight 7 · Grammar & Vocabulary Trainer</div>
+
+    <script>
+        // ==================== ЗВУКИ ====================
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+            return audioCtx;
+        }
+        function playPopSound() {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 800;
+                osc.type = 'sine';
+                gain.gain.value = 0.12;
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.1);
+            } catch(e) {}
+        }
+        function playCorrectSound() {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.setValueAtTime(523, ctx.currentTime);
+                osc.frequency.setValueAtTime(659, ctx.currentTime + 0.08);
+                osc.frequency.setValueAtTime(784, ctx.currentTime + 0.16);
+                osc.type = 'sine';
+                gain.gain.value = 0.1;
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.3);
+            } catch(e) {}
+        }
+        function playWrongSound() {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.setValueAtTime(400, ctx.currentTime);
+                osc.frequency.setValueAtTime(300, ctx.currentTime + 0.1);
+                osc.type = 'sawtooth';
+                gain.gain.value = 0.08;
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.25);
+            } catch(e) {}
+        }
+
+        // ==================== ФУНКЦИИ ====================
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+        function prepareOptions(q) {
+            if (q.type !== 'option') return q;
+            const shuffled = q.options.map((opt, idx) => ({ text: opt, originalIndex: idx }));
+            shuffleArray(shuffled);
+            const newOptions = shuffled.map(item => item.text);
+            const newCorrect = shuffled.findIndex(item => item.originalIndex === q.correct);
+            return { ...q, options: newOptions, correct: newCorrect };
+        }
+
+        // ==================== ВСЕ ВОПРОСЫ ====================
+        const allQuestions = {
+            module1: [
+                // ============ OPTION (кнопки) — 25 вопросов ============
+                { type: "option", text: "I ... a city mouse. I love the hustle and bustle!", options: ["am", "is", "are"], correct: 0 },
+                { type: "option", text: "You ... lose your keys. Keep them in your pocket.", options: ["should", "shouldn't", "don't"], correct: 1 },
+                { type: "option", text: "Listen! The birds ... in the garden.", options: ["sing", "are singing", "sings"], correct: 1 },
+                { type: "option", text: "We ... milk, so we went shopping.", options: ["ran into", "ran out of", "ran after"], correct: 1 },
+                { type: "option", text: "The bus ... at 7:30 every morning.", options: ["leaves", "is leaving", "leave"], correct: 0 },
+                { type: "option", text: "You ... swim in this lake. It's dangerous.", options: ["should", "shouldn't", "don't"], correct: 1 },
+                { type: "option", text: "My sister ... always ... my clothes!", options: ["is/taking", "takes", "does/take"], correct: 0 },
+                { type: "option", text: "You ... tired. You should have a rest.", options: ["look", "are looking", "looks"], correct: 0 },
+                { type: "option", text: "I sometimes ... my friends at the shopping centre.", options: ["run into", "run out of", "run after"], correct: 0 },
+                { type: "option", text: "On a rainy day I ... a book.", options: ["read", "go surfing", "sunbathe"], correct: 0 },
+                { type: "option", text: "You ... install an alarm system. It's important.", options: ["should", "shouldn't", "don't"], correct: 0 },
+                { type: "option", text: "We go ... a ride at the theme park every summer.", options: ["on", "at", "for"], correct: 0 },
+                { type: "option", text: "Let's watch a film ... the cinema.", options: ["at", "on", "from"], correct: 0 },
+                { type: "option", text: "This shop is the best place to shop ... gifts.", options: ["for", "about", "on"], correct: 0 },
+                { type: "option", text: "On a warm day my family ... lunch outdoors.", options: ["has", "have", "is having"], correct: 0 },
+                { type: "option", text: "On a hot day we ... sunbathing at the beach.", options: ["go", "do", "play"], correct: 0 },
+                { type: "option", text: "In the city there is heavy ..., but in the country there is peace and quiet.", options: ["traffic", "streets", "noise"], correct: 0 },
+                { type: "option", text: "I'm ... about this new computer game!", options: ["crazy", "fond", "interested"], correct: 0 },
+                { type: "option", text: "What ... you ... at the moment?", options: ["are/doing", "do/do", "is/doing"], correct: 0 },
+                { type: "option", text: "She ... in a small village with her family.", options: ["live", "lives", "living"], correct: 1 },
+                { type: "option", text: "You ... eat so much junk food. It's bad for you.", options: ["should", "shouldn't", "don't"], correct: 1 },
+                { type: "option", text: "On a rainy day, I like to ... with my friends.", options: ["chat", "surf", "hang"], correct: 0 },
+                { type: "option", text: "I can't stand the noise! You ... be quiet.", options: ["should", "shouldn't", "don't"], correct: 0 },
+                { type: "option", text: "She ... a book at the moment. Don't disturb her.", options: ["reads", "is reading", "read"], correct: 1 },
+                { type: "option", text: "Don't ... the burglar — call the police!", options: ["run after", "run into", "run out of"], correct: 0 },
+
+                // ============ INPUT (полное предложение) — 25 вопросов ============
+                { type: "input", text: "He ... (work) on a farm every day.", correctAnswers: ["He works on a farm every day."] },
+                { type: "input", text: "On a hot day we ... (go) surfing at the beach.", correctAnswers: ["On a hot day we go surfing at the beach."] },
+                { type: "input", text: "I'm crazy ... skateboarding!", correctAnswers: ["I'm crazy about skateboarding!", "I am crazy about skateboarding!"] },
+                { type: "input", text: "We ... (visit) our grandparents this weekend.", correctAnswers: ["We are visiting our grandparents this weekend.", "We're visiting our grandparents this weekend."] },
+                { type: "input", text: "There are plenty of activities to choose ...", correctAnswers: ["There are plenty of activities to choose from."] },
+                { type: "input", text: "Water ... (boil) at 100°C.", correctAnswers: ["Water boils at 100°C.", "Water boils at 100C."] },
+                { type: "input", text: "We go on a visit ... the museum every year.", correctAnswers: ["We go on a visit to the museum every year."] },
+                { type: "input", text: "I ... my friends at the shopping centre every weekend. (run into)", correctAnswers: ["I run into my friends at the shopping centre every weekend."] },
+                { type: "input", text: "I ... (think) of changing my lifestyle.", correctAnswers: ["I am thinking of changing my lifestyle.", "I'm thinking of changing my lifestyle."] },
+                { type: "input", text: "My grandad ... (do) the gardening every Sunday.", correctAnswers: ["My grandad does the gardening every Sunday."] },
+                { type: "input", text: "Your friend has a toothache. What is your advice?\nYou ... see a dentist about your toothache.", correctAnswers: ["You should see a dentist about your toothache."] },
+                { type: "input", text: "I like to ... the Net in the evening.", correctAnswers: ["I like to surf the Net in the evening."] },
+                { type: "input", text: "Make negative: He is sleeping now.", correctAnswers: ["He isn't sleeping now.", "He is not sleeping now."] },
+                { type: "input", text: "Manly is the best place to shop for skating ...", correctAnswers: ["Manly is the best place to shop for skating gear."] },
+                { type: "input", text: "I ... (not/like) waking up early.", correctAnswers: ["I don't like waking up early.", "I do not like waking up early."] },
+                { type: "input", text: "Give advice: You ... open the door to strangers.", correctAnswers: ["You shouldn't open the door to strangers."] },
+                { type: "input", text: "We ... sugar. Can you buy some? (run out of)", correctAnswers: ["We ran out of sugar."] },
+                { type: "input", text: "She usually ... (get up) at 7 am.", correctAnswers: ["She usually gets up at 7 am.", "She usually gets up at 7 a.m."] },
+                { type: "input", text: "My parents ... (drive) me to school every morning.", correctAnswers: ["My parents drive me to school every morning."] },
+                { type: "input", text: "Don't ... after the thief — call the police!", correctAnswers: ["Don't run after the thief — call the police!", "Don't run after the thief - call the police!"] },
+                { type: "input", text: "Look! It ... outside. Take an umbrella.", correctAnswers: ["Look! It is raining outside. Take an umbrella.", "Look! It's raining outside. Take an umbrella."] },
+                { type: "input", text: "Give advice: You ... leave your valuables in the car.", correctAnswers: ["You shouldn't leave your valuables in the car."] },
+                { type: "input", text: "I ... my friends at the park every Saturday. (run into)", correctAnswers: ["I run into my friends at the park every Saturday."] },
+                { type: "input", text: "She ... a book at the moment. Don't disturb her.", correctAnswers: ["She is reading a book at the moment. Don't disturb her.", "She's reading a book at the moment. Don't disturb her."] },
+                { type: "input", text: "I ... (see) a doctor about my toothache.", correctAnswers: ["I should see a doctor about my toothache."] }
+            ]
+        };
+
+        // ==================== СОСТОЯНИЕ ====================
+        let currentModule = null;
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let checkedQuestions = {};
+        let totalQuestions = 0;
+        let moduleStartTime = null;
+        let moduleEndTime = null;
+
+        function goHome() {
+            document.getElementById('modulesGrid').classList.remove('hidden');
+            document.getElementById('testMode').classList.remove('active');
+            if (currentModule) moduleEndTime = Date.now();
+            currentModule = null;
+            currentQuestionIndex = 0;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function openModule(moduleName) {
+            playPopSound();
+            currentModule = moduleName;
+            currentQuestionIndex = 0;
+            userAnswers = {};
+            checkedQuestions = {};
+            moduleStartTime = Date.now();
+            moduleEndTime = null;
+
+            let questions = allQuestions[moduleName];
+            if (!questions || questions.length === 0) {
+                alert('Questions for this module are coming soon!');
+                return;
+            }
+
+            const shuffled = shuffleArray([...questions]).map(q => {
+                if (q.type === 'option') return prepareOptions(q);
+                return { ...q };
+            });
+            allQuestions[moduleName] = shuffled;
+
+            totalQuestions = shuffled.length;
+            document.getElementById('modulesGrid').classList.add('hidden');
+            document.getElementById('testMode').classList.add('active');
+            document.getElementById('testTitle').textContent = 'Module 1 — Lifestyles';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            renderQuestion();
+        }
+
+        function getAnswerKey() {
+            return currentModule + '_' + currentQuestionIndex;
+        }
+
+        function renderQuestion() {
+            const questions = allQuestions[currentModule];
+            if (!questions || currentQuestionIndex >= questions.length) return;
+            const q = questions[currentQuestionIndex];
+            const key = getAnswerKey();
+            const status = checkedQuestions[key];
+
+            document.getElementById('questionText').textContent = q.text;
+            document.getElementById('questionCounter').textContent = (currentQuestionIndex + 1) + ' / ' + totalQuestions;
+            document.getElementById('progressFill').style.width = ((currentQuestionIndex + 1) / totalQuestions * 100) + '%';
+
+            const badge = document.getElementById('questionTypeBadge');
+            if (q.type === 'option') {
+                badge.innerHTML = '<span class="question-type-badge badge-option">Multiple Choice</span>';
+            } else {
+                badge.innerHTML = '<span class="question-type-badge badge-input">Fill in</span>';
+            }
+
+            const instr = document.getElementById('inputInstruction');
+            if (q.type === 'input') {
+                instr.innerHTML = '<div class="input-instruction">✍️ Write the full sentence.</div>';
+            } else {
+                instr.innerHTML = '';
+            }
+
+            const optionsList = document.getElementById('optionsList');
+            const inputArea = document.getElementById('inputArea');
+
+            optionsList.style.display = 'none';
+            inputArea.style.display = 'none';
+
+            if (q.type === 'option') {
+                optionsList.style.display = 'flex';
+                optionsList.innerHTML = '';
+                q.options.forEach((opt, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.textContent = opt;
+                    if (status !== undefined) {
+                        btn.classList.add('disabled');
+                        if (index === q.correct) btn.classList.add('correct');
+                        if (userAnswers[key] === index && status === 'wrong') btn.classList.add('wrong');
+                    }
+                    btn.addEventListener('click', function() {
+                        if (checkedQuestions[key] !== undefined) return;
+                        userAnswers[key] = index;
+                        if (index === q.correct) {
+                            checkedQuestions[key] = 'correct';
+                            playCorrectSound();
+                        } else {
+                            checkedQuestions[key] = 'wrong';
+                            playWrongSound();
+                        }
+                        renderQuestion();
+                    });
+                    optionsList.appendChild(btn);
+                });
+            } else if (q.type === 'input') {
+                inputArea.style.display = 'flex';
+                const inputField = document.getElementById('inputField');
+                const checkBtn = document.getElementById('checkBtn');
+                const feedback = document.getElementById('inputFeedback');
+
+                if (status !== undefined) {
+                    inputField.value = userAnswers[key] || '';
+                    inputField.disabled = true;
+                    checkBtn.disabled = true;
+                    if (status === 'correct') {
+                        inputField.className = 'correct-input';
+                        feedback.className = 'input-feedback correct-feedback';
+                        feedback.textContent = '✅ Correct!';
+                    } else {
+                        inputField.className = 'wrong-input';
+                        feedback.className = 'input-feedback wrong-feedback';
+                        feedback.textContent = '❌ Wrong. Correct answer: ' + q.correctAnswers[0];
+                    }
+                } else {
+                    inputField.value = '';
+                    inputField.disabled = false;
+                    inputField.className = '';
+                    checkBtn.disabled = false;
+                    feedback.textContent = '';
+                    feedback.className = 'input-feedback';
+                    inputField.focus();
+                }
+            }
+
+            document.getElementById('prevBtn').disabled = (currentQuestionIndex === 0);
+            document.getElementById('nextBtn').disabled = (currentQuestionIndex >= totalQuestions - 1);
+            updateScore();
+        }
+
+        function normalizeAnswer(str) {
+            return str
+                .trim()
+                .toLowerCase()
+                .replace(/[.!?,;:—–-]/g, '')
+                .replace(/\s+/g, ' ');
+        }
+
+        function checkInput() {
+            const q = allQuestions[currentModule][currentQuestionIndex];
+            const key = getAnswerKey();
+            if (checkedQuestions[key] !== undefined) return;
+
+            const inputField = document.getElementById('inputField');
+            const feedback = document.getElementById('inputFeedback');
+            const userAnswer = inputField.value.trim();
+
+            const normalizedUser = normalizeAnswer(userAnswer);
+            const isCorrect = q.correctAnswers.some(ans => normalizeAnswer(ans) === normalizedUser);
+
+            userAnswers[key] = userAnswer;
+            if (isCorrect) {
+                checkedQuestions[key] = 'correct';
+                inputField.className = 'correct-input';
+                feedback.className = 'input-feedback correct-feedback';
+                feedback.textContent = '✅ Correct!';
+                playCorrectSound();
+            } else {
+                checkedQuestions[key] = 'wrong';
+                inputField.className = 'wrong-input';
+                feedback.className = 'input-feedback wrong-feedback';
+                feedback.textContent = '❌ Wrong. Correct answer: ' + q.correctAnswers[0];
+                playWrongSound();
+            }
+            inputField.disabled = true;
+            document.getElementById('checkBtn').disabled = true;
+            updateScore();
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < totalQuestions - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+                document.querySelector('.test-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+                document.querySelector('.test-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function updateScore() {
+            let correctCount = 0;
+            const questions = allQuestions[currentModule];
+            if (!questions) return;
+            for (let i = 0; i < questions.length; i++) {
+                const key = currentModule + '_' + i;
+                if (checkedQuestions[key] === 'correct') correctCount++;
+            }
+            document.getElementById('scoreDisplay').textContent = 'Score: ' + correctCount;
+        }
+
+        function shareResults() {
+            const questions = allQuestions[currentModule];
+            if (!questions) return;
+
+            let correctCount = 0;
+            const mistakes = [];
+            for (let i = 0; i < questions.length; i++) {
+                const key = currentModule + '_' + i;
+                if (checkedQuestions[key] === 'correct') {
+                    correctCount++;
+                } else if (checkedQuestions[key] === 'wrong') {
+                    const q = questions[i];
+                    const userAns = userAnswers[key] || '(no answer)';
+                    let correctAns = '';
+                    if (q.type === 'option') correctAns = q.options[q.correct];
+                    else if (q.type === 'input') correctAns = q.correctAnswers[0];
+                    mistakes.push({ number: i + 1, text: q.text, userAnswer: userAns, correctAnswer: correctAns });
+                }
+            }
+
+            const total = questions.length;
+            const percent = Math.round((correctCount / total) * 100);
+            const endTime = moduleEndTime || Date.now();
+            const timeSpent = Math.floor((endTime - moduleStartTime) / 1000);
+            const minutes = Math.floor(timeSpent / 60);
+            const seconds = timeSpent % 60;
+
+            let report = '📊 Spotlight 7 — Module 1 — Lifestyles\n';
+            report += '✅ Score: ' + correctCount + ' / ' + total + ' (' + percent + '%)\n';
+            report += '⏱️ Time: ' + minutes + ' min ' + seconds + ' sec\n\n';
+
+            if (mistakes.length > 0) {
+                report += '❌ Mistakes:\n';
+                mistakes.forEach(m => {
+                    report += m.number + '. ' + m.text + ' → Correct: ' + m.correctAnswer + '\n';
+                });
+            } else {
+                report += '🎉 Perfect! No mistakes!';
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(report).then(() => {
+                    alert('✅ Results copied to clipboard!\n\nShare them with your teacher.');
+                }).catch(() => fallbackShare(report));
+            } else {
+                fallbackShare(report);
+            }
+        }
+
+        function fallbackShare(report) {
+            const textarea = document.createElement('textarea');
+            textarea.value = report;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                alert('✅ Results copied to clipboard!\n\nShare them with your teacher.');
+            } catch(e) {
+                prompt('Copy this text and share it:', report);
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // ==================== КЛАВИШИ ====================
+        document.addEventListener('keydown', function(e) {
+            if (document.getElementById('testMode').classList.contains('active')) {
+                if (e.key === 'ArrowRight') { e.preventDefault(); nextQuestion(); }
+                if (e.key === 'ArrowLeft') { e.preventDefault(); prevQuestion(); }
+            }
+            if (e.key === 'Enter') {
+                const inputArea = document.getElementById('inputArea');
+                if (inputArea.style.display !== 'none') {
+                    const checkBtn = document.getElementById('checkBtn');
+                    if (!checkBtn.disabled) checkInput();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
